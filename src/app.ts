@@ -1,34 +1,36 @@
-import express, { json } from 'express'
-import sequelize from './database'
-import User from './app/models/User'
-// import User2 from './app/models/User2'
+import express from 'express'
+import { Express } from 'express-serve-static-core'
+import database from './database'
+import routes from './routes'
 
-const app = express()
+class App {
+  server: Express
+  constructor() {
+    this.server = express()
+    this.init()
+  }
 
-app.use(json())
-
-app.post('/users', async (req, res) => {
+  async init() {
     try {
-        const { name, email } = req.body
-        const user = await User.create({name, email})
-        return res.json({})   
+      // if (process.env.NODE_ENV !== 'test') await db.connection.authenticate()
+      // if (process.env.NODE_ENV === 'development') await db.connection.sync()
+      this.middlewares()
+      this.routes()
     } catch (error) {
-        console.warn(error)
-        return res.status(500).json({ error })
+      console.error(error, '\n Server failed to init.')
     }
-})
+  }
 
-app.get('/users', async (req, res) => {
-    try {
-        const users = await User.findAll()
-        return res.json(users)
-    } catch (error) {
-        console.warn(error)
-        return res.status(500).json({ error })
-    }
-})
+  middlewares() {
+    this.server.use(express.json())
+    // this.server.use(cors());
+    // this.server.use(bodyParser.urlencoded({ extended: true }));
+  }
 
-app.listen(3333, async () => { 
-    await sequelize.sync({ force: true })
-    console.log('Listening on 3333')
-})
+  routes() {
+    this.server.use(routes)
+    console.log('Routes are on!')
+  }
+}
+
+export default new App().server

@@ -1,18 +1,12 @@
-import { Router } from 'express'
-// import UserController from './app/controllers/User'
-import User2 from './app/models/User2'
+import { Router, Request, Response } from 'express'
+import UserController from './app/controllers/UserController'
+const routes = Router()
 
-const routes = new Router()
+routes.route('/users')
+  .get(UserController.findAll)
+  .post(UserController.create)
 
-// routes.route('/users')
-//   .get(UserController.findAll)
-//   .post(UserController.create)
-
-routes.route('/test').get((req, res) => {
-  const test = await User2.findAll()
-  return res.json(test)
-})
-
-// routes.route('/users').get((req, res) => res.json({ success: true }))
+  routes.route('/users/:id')
+  .get(UserController.findOne)
 
 export default routes

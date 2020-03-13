@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { Sequelize, Model, DataTypes, CreateOptions, FindOptions } from "sequelize";
+import { Model, DataTypes, CreateOptions, FindOptions } from "sequelize";
 import { notEmpty, invalidEmail } from "./utils/errorMessages";
 import sequelize from '../../database'
 
@@ -8,23 +8,28 @@ interface IUser {
   email: string
 }
 
-class User extends Model{
+class User extends Model {
   id!: string
   name!: string
   email!: string
+
+  createdAt!: string
+  updatedAt!: string
 }
 
 class UserService {
-  // static init(sequelize: Sequelize){
-    
-  // }
-
-  static create (values: IUser, options?: CreateOptions) {
-    return User.create(values, options)
+  static async findAll(options?: FindOptions) {
+    const instances = await User.findAll(options)
+    return instances.map(({ id, name, email }) => ({ id, name, email }))
   }
 
-  static findAll (options?: FindOptions) {
-    return User.findAll(options)
+  static findOne(options?: FindOptions) {
+    return User.findOne(options)
+  }
+
+  static async create(values: IUser, options?: CreateOptions) {
+    const { id, createdAt } = await User.create(values, options)
+    return { id, createdAt }
   }
 }
 
@@ -57,6 +62,7 @@ User.init({
   tableName: 'user',
   hooks: {
     beforeValidate: (instance) => {
+      // TODO: test it: instance.id = uuidv4()
       instance.setDataValue('id', uuidv4())
     },
     beforeBulkCreate: (instances) => {
@@ -64,20 +70,6 @@ User.init({
         instance.setDataValue('id', uuidv4())
       }
     }
-
-    // Tests
-    // beforeBulkDestroy: () => { console.log('--------- User beforeBulkDestroy') },
-    // beforeBulkSync: () => { console.log('--------- User beforeBulkSync') },
-    // beforeBulkUpdate: () => { console.log('--------- User beforeBulkUpdate') },
-    // beforeCreate: () => { console.log('--------- User beforeCreate') },
-    // beforeCount: () => { console.log('--------- User beforeCount') },
-    // beforeDestroy: () => { console.log('--------- User beforeDestroy') },
-    // beforeFind: () => { console.log('--------- User beforeFind') },
-    // beforeFindAfterExpandIncludeAll: () => { console.log('--------- User beforeFindAfterExpandIncludeAll') },
-    // beforeFindAfterOptions: () => { console.log('--------- User beforeFindAfterOptions') },
-    // beforeSave: () => { console.log('--------- User beforeSave') },
-    // beforeSync: () => { console.log('--------- User beforeSync') },
-    // beforeUpdate: () => { console.log('--------- User beforeUpdate') }
   }
 });
 
